@@ -1,0 +1,11 @@
+__pycache__/
+.pytest_cache/
+*.py[cod]
+/.venv/
+
+/outputs/
+/.vscode
+
+AGENT.md
+.env
+!.env.example
