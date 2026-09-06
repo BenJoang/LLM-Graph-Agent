@@ -1,4 +1,4 @@
-"""LLM 模型层：模型连接 + 模型家族抽象。"""
+"""LLM 模型层：模型连接 + 模型家族抽象 + 配置加载。"""
 
 from llm_graph_agent.llm.client import (
     build_async_client,
@@ -15,6 +15,8 @@ from llm_graph_agent.llm.families import (
     get_family,
     register_family,
 )
+from llm_graph_agent.llm.profiles import load_profile
+from llm_graph_agent.llm.prompts import load_prompt
 
 __all__ = [
     "build_async_client",
@@ -29,4 +31,7 @@ __all__ = [
     "FAMILIES",
     "get_family",
     "register_family",
+    # 配置加载
+    "load_profile",
+    "load_prompt",
 ]

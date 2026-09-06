@@ -1,0 +1,24 @@
+{
+    "prompts":{
+        "default":{
+            "name":"默认学习用助手",
+            "description":"这是一个默认的学习用助手,只在最开始学习调试用",
+            "system":"你是一个简洁、准确的中文助手。"
+        },
+        "tool_agent":{
+            "name": "工具执行者",
+            "description": "根据用户问题和工具列表，选择最合适的工具，并且给出工具执行结果。",    
+            "system_file": "prompts/tool_agent.md"
+        },
+        "subagent":{
+            "name":"子代理",
+            "description":"当用户问题需要调用多个工具或者需要分步骤解决时，使用子代理来完成任务",
+            "system_file":"prompts/subagent.md"
+        },
+        "collapse_compact":{
+            "name":"历史上下文总结用",
+            "description":"上下文第二层压缩时使用",
+            "system_file":"prompts/collapse_compact.md"
+        }
+    }
+}

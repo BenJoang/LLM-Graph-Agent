@@ -1,0 +1,133 @@
+{
+    "defaults": {
+        "generation": {
+            "temperature": 1.0,
+            "top_p": 0.95,
+            "presence_penalty": 0.0
+        }
+    },
+    "profiles":{
+        "deepseekv4-flash":{
+            "model":"deepseek-v4-flash",
+            "base_url_env": "DEEPSEEK_BASE_URL",
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "thinking": {
+                    "type": "enabled"
+                }
+            }
+        },
+        "deepseekv4-flash-temp":{
+            "model":"deepseek-v4-flash",
+            "base_url_env": "DEEPSEEK_BASE_URL_TEMP",
+            "api_key_env": "DEEPSEEK_BASE_URL_TEMP_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "thinking": {
+                    "type": "enabled"
+                }
+            }
+        },
+        "deepseekv4-pro":{
+            "model":"deepseek-v4-pro",
+            "base_url_env": "DEEPSEEK_BASE_URL",
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "thinking": {
+                    "type": "enabled"
+                }
+            }
+        },
+        "deepseekv4-vision":{
+            "model":"deepseek-v4-flash-vision-exp",
+            "base_url_env": "DEEPSEEK_BASE_URL",
+            "api_key_env": "DEEPSEEK_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "thinking": {
+                    "type": "enabled"
+                }
+            }
+        },
+        "deepseekv4-vision-temp":{
+            "model":"deepseek-v4-flash-vision-exp",
+            "base_url_env": "DEEPSEEK_BASE_URL_TEMP",
+            "api_key_env": "DEEPSEEK_BASE_URL_TEMP_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "thinking": {
+                    "type": "enabled"
+                }
+            }
+        },
+        "qwen3.6":{
+            "model":"qwen3.6-27B",
+            "base_url_env":"QWEN36_BASE_URL",
+            "api_key_env": "QWEN36_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "chat_template_kwargs": {
+                    "enable_thinking": true
+                }
+            }
+        },
+        "qwen3.8":{
+            "model":"qwen3.8-27B",
+            "base_url_env":"QWEN38_BASE_URL",
+            "api_key_env": "QWEN38_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "chat_template_kwargs": {
+                    "enable_thinking": true
+                }
+            }
+        },
+        "qwen3.8-flash":{
+            "model":"qwen3.8-flash-next",
+            "base_url_env":"QWEN38_FLASH_BASE_URL",
+            "api_key_env": "QWEN38_FLASH_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "chat_template_kwargs": {
+                    "enable_thinking": true
+                }
+            }
+        },
+        "qwen2-vl":{
+            "model":"qwen2-vl-7b",
+            "base_url_env":"QWEN36_BASE_URL",
+            "api_key_env": "QWEN36_API_KEY",
+            "support_tools": false
+        },
+        "qwen3-vl":{
+            "model":"qwen3-vl-8b",
+            "base_url_env":"QWEN36_BASE_URL",
+            "api_key_env": "QWEN36_API_KEY",
+            "support_tools": false
+        },
+        "qwen3.5-9b":{
+            "model": "qwen3.5-9B",
+            "base_url_env": "QWEN35_9B_BASE_URL",
+            "api_key_env": "QWEN35_9B_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "chat_template_kwargs": {
+                    "enable_thinking": false
+                }
+            }
+        },
+        "qwen3.5-4b":{
+            "model": "qwen3.5-4B",
+            "base_url_env": "QWEN35_4B_BASE_URL",
+            "api_key_env": "QWEN35_4B_API_KEY",
+            "support_tools": true,
+            "extra_body":{
+                "chat_template_kwargs": {
+                    "enable_thinking": false
+                }
+            }
+        }
+    }
+}
