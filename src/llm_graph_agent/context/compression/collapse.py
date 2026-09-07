@@ -1,11 +1,13 @@
 """上下文折叠：把旧轮次的消息折叠成摘要消息。
 
-纯结构操作：查找可折叠的消息块、生成摘要/压缩消息、判定消息类型。
-不直接调用模型——摘要内容由调用方通过回调生成后传入。
+纯结构操作，不调用模型——摘要内容由 engine 生成后传入。职责分组：
+- 规划：_find_next_collapse_batch / _plan_retry_summary_merges / _plan_retry_turn_collapses
+- 投影：_apply_context_collapse（应用已提交的 commit）
+- 定位：_find_contiguous_* / _adjust_batch_for_tool_calls
+- 构造：_make_summary_message / _make_compressed_turn_message
 """
 from __future__ import annotations
 
-from copy import deepcopy
 from uuid import uuid4
 
 from langchain_core.messages import HumanMessage, AIMessage
