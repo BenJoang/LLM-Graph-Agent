@@ -95,22 +95,6 @@ class ConversationStore(Protocol):
         compression_session: dict[str, Any],
     ) -> ContextRecord: ...
 
-    def get_migration(
-        self,
-        source: str,
-        source_id: str,
-    ) -> dict[str, Any] | None: ...
-
-    def record_migration(
-        self,
-        source: str,
-        source_id: str,
-        *,
-        source_version: str,
-        checksum: str,
-        details: dict[str, Any],
-    ) -> None: ...
-
     def finish_run(
         self,
         run_id: str,

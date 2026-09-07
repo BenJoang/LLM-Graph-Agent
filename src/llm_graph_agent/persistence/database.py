@@ -14,7 +14,6 @@ from llm_graph_agent.persistence.models import (
     RunRecord,
 )
 from llm_graph_agent.persistence.protocol import ConversationStore
-from llm_graph_agent.persistence.postgres_store import PostgresConversationStore
 
 def conversation_database_url() -> str:
     """返回对话业务数据库 URL。
@@ -66,6 +65,9 @@ def create_conversation_store(
 
         return SQLiteConversationStore(connection_url)
     if scheme in {"postgres", "postgresql"}:
+        from llm_graph_agent.persistence.postgres_store import (
+            PostgresConversationStore,
+        )
         return PostgresConversationStore(connection_url)
 
     raise ValueError(
