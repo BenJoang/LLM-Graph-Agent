@@ -51,10 +51,6 @@ VALID_RUN_STATUSES = frozenset({
     *VALID_FINAL_RUN_STATUSES,
 })
 
-DEFAULT_CONVERSATION_SQLITE_PATH = (
-    PROJECT_ROOT / "outputs" / "conversations" / "conversation.sqlite3"
-)
-
 class ActiveRunError(RuntimeError):
     """同一个会话已经存在正在运行的任务。"""
 

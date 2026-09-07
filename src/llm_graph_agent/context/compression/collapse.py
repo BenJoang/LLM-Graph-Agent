@@ -15,6 +15,16 @@ from llm_graph_agent.context.messages import (
     mark_ai_message,
     set_context_state,
 )
+from llm_graph_agent.context.segment import (
+    get_message_id,
+    has_tool_calls,
+    is_ai_message,
+    is_compressed_turn_message,
+    is_human_message,
+    is_summary_message,
+    is_tool_message,
+    message_role,
+)
 
 
 def _apply_context_collapse(messages: list, session: dict):
@@ -29,7 +39,7 @@ def _apply_context_collapse(messages: list, session: dict):
             continue
 
         result_ids = [
-            _get_message_id(msg)
+            get_message_id(msg)
             for msg in result
         ]
 
@@ -97,7 +107,7 @@ def _find_next_collapse_batch(
     human_indexes = [
         index
         for index, msg in enumerate(messages)
-        if _is_human_message(msg)
+        if is_human_message(msg)
     ]
 
     if not human_indexes:
@@ -133,11 +143,11 @@ def _find_next_collapse_batch(
 
             if not reached_end:
                 msg = messages[index]
-                msg_id = _get_message_id(msg)
+                msg_id = get_message_id(msg)
 
                 compressible = (
-                    not _is_human_message(msg)
-                    and not _is_summary_message(msg, session)
+                    not is_human_message(msg)
+                    and not is_summary_message(msg, session)
                     and msg_id not in collapsed_ids
                 )
             else:
@@ -190,8 +200,8 @@ def _find_contiguous_summary_groups(
     current_group = []
 
     for message in messages[start_index:end_index]:
-        if _is_summary_message(message, session):
-            message_id = _get_message_id(message)
+        if is_summary_message(message, session):
+            message_id = get_message_id(message)
 
             if message_id is not None:
                 current_group.append(message_id)
@@ -213,7 +223,7 @@ def _find_contiguous_message_ids(
     source_ids: list[str],
 ) -> tuple[int, int] | None:
     message_ids = [
-        _get_message_id(message)
+        get_message_id(message)
         for message in messages
     ]
 
@@ -236,7 +246,7 @@ def _plan_retry_summary_merges(
     human_indexes = [
         index
         for index, message in enumerate(messages)
-        if _is_human_message(message)
+        if is_human_message(message)
     ]
 
     if not human_indexes:
@@ -252,7 +262,7 @@ def _plan_retry_summary_merges(
         )
 
         anchor_human = messages[human_index]
-        anchor_human_id = _get_message_id(anchor_human)
+        anchor_human_id = get_message_id(anchor_human)
         turn_id = get_message_turn_id(anchor_human)
 
         body_start = human_index + 1
@@ -283,7 +293,7 @@ def _plan_retry_turn_collapses(
     human_indexes = [
         index
         for index, message in enumerate(messages)
-        if _is_human_message(message)
+        if is_human_message(message)
     ]
 
     plans = []
@@ -309,7 +319,7 @@ def _plan_retry_turn_collapses(
         if turn_id >= current_turn_id:
             continue
 
-        if _is_compressed_turn_message(
+        if is_compressed_turn_message(
             human_message
         ):
             continue
@@ -330,13 +340,13 @@ def _plan_retry_turn_collapses(
 
         ai_message = turn_body[0]
 
-        if not _is_ai_message(ai_message):
+        if not is_ai_message(ai_message):
             continue
 
-        human_id = _get_message_id(
+        human_id = get_message_id(
             human_message
         )
-        ai_id = _get_message_id(
+        ai_id = get_message_id(
             ai_message
         )
 
@@ -364,17 +374,17 @@ def _adjust_batch_for_tool_calls(
     hard_end: int,
 ) -> int | None:
     # 批次不能以 ToolMessage 开头，否则可能留下孤立工具结果。
-    if _is_tool_message(messages[start]):
+    if is_tool_message(messages[start]):
         return None
 
     adjusted_end = end
 
     # 如果最后选择的是带 tool_calls 的 AIMessage，
     # 把它后面的 ToolMessage 一并包含进来。
-    if _has_tool_calls(messages[adjusted_end - 1]):
+    if has_tool_calls(messages[adjusted_end - 1]):
         while (
             adjusted_end < hard_end
-            and _is_tool_message(messages[adjusted_end])
+            and is_tool_message(messages[adjusted_end])
         ):
             adjusted_end += 1
 
@@ -382,20 +392,20 @@ def _adjust_batch_for_tool_calls(
     # 将紧随其后的并行 ToolMessage 一起包含。
     while (
         adjusted_end < hard_end
-        and _is_tool_message(messages[adjusted_end - 1])
-        and _is_tool_message(messages[adjusted_end])
+        and is_tool_message(messages[adjusted_end - 1])
+        and is_tool_message(messages[adjusted_end])
     ):
         adjusted_end += 1
 
     # 最终仍以带 tool_calls 的消息结尾，说明对应结果在保护区外。
-    if _has_tool_calls(messages[adjusted_end - 1]):
+    if has_tool_calls(messages[adjusted_end - 1]):
         return None
 
     # 下一条还是 ToolMessage，说明并行工具结果没有收完整。
     if (
         adjusted_end < len(messages)
-        and _is_tool_message(messages[adjusted_end - 1])
-        and _is_tool_message(messages[adjusted_end])
+        and is_tool_message(messages[adjusted_end - 1])
+        and is_tool_message(messages[adjusted_end])
     ):
         return None
 
@@ -450,90 +460,3 @@ def _make_compressed_turn_message(
     )
 
     return message
-
-def _message_role(msg):
-    if isinstance(msg, dict):
-        return msg.get("role", "unknown")
-
-    name = msg.__class__.__name__
-    if name == "HumanMessage":
-        return "user"
-    if name == "AIMessage":
-        return "assistant"
-    if name == "ToolMessage":
-        return "tool"
-    if name == "SystemMessage":
-        return "system"
-
-    return name
-
-def _get_message_id(msg):
-    if isinstance(msg, dict):
-        return msg.get("id")
-    return getattr(msg, "id", None)
-
-def _is_human_message(msg) -> bool:
-    if isinstance(msg, dict):
-        return msg.get("role") in {"user", "human"}
-
-    return msg.__class__.__name__ == "HumanMessage"
-
-def _is_ai_message(message) -> bool:
-    if isinstance(message, dict):
-        return message.get("role") in {
-            "assistant",
-            "ai",
-        }
-
-    return (
-        message.__class__.__name__
-        == "AIMessage"
-    )
-
-def _is_summary_message(msg, session: dict) -> bool:
-    msg_id = MessageManage._get_message_id(msg)
-
-    summary_ids = {
-        commit.get("summary_id")
-        for commit in session["collapse_commits"]
-    }
-
-    if msg_id in summary_ids:
-        return True
-
-    if isinstance(msg, dict):
-        metadata = msg.get("response_metadata", {}) or {}
-    else:
-        metadata = getattr(msg, "response_metadata", {}) or {}
-
-    compression = metadata.get("context_compression", {}) or {}
-    return compression.get("is_summary") is True
-
-def _is_compressed_turn_message(message) -> bool:
-    if isinstance(message, dict):
-        metadata = message.get(
-            "response_metadata",
-            {},
-        ) or {}
-    else:
-        metadata = getattr(
-            message,
-            "response_metadata",
-            {},
-        ) or {}
-
-    compression = metadata.get(
-        "context_compression",
-        {},
-    ) or {}
-
-    return (
-        compression.get("is_compressed_turn")
-        is True
-    )
-
-def _has_tool_calls(msg) -> bool:
-    if isinstance(msg, dict):
-        return bool(msg.get("tool_calls"))
-
-    return bool(getattr(msg, "tool_calls", None))

@@ -35,17 +35,22 @@ from llm_graph_agent.context.compression.collapse import (
     _find_contiguous_message_ids,
     _find_contiguous_summary_groups,
     _find_next_collapse_batch,
-    _get_message_id,
-    _has_tool_calls,
-    _is_ai_message,
-    _is_compressed_turn_message,
-    _is_human_message,
-    _is_summary_message,
     _make_compressed_turn_message,
     _make_summary_message,
-    _message_role,
     _plan_retry_summary_merges,
     _plan_retry_turn_collapses,
+)
+from llm_graph_agent.context.segment import (
+    get_content,
+    get_message_id,
+    has_tool_calls,
+    is_ai_message,
+    is_compressed_turn_message,
+    is_human_message,
+    is_summary_message,
+    is_tool_message,
+    message_role,
+    set_content,
 )
 
 
@@ -256,9 +261,9 @@ class MessageManage:
             tool_head_chars=self.tool_head_chars,
             tool_tail_lines=self.tool_tail_lines,
             tool_tail_chars=self.tool_tail_chars,
-            is_tool_message=self._is_tool_message,
-            get_content=self._get_content,
-            set_content=self._set_content,
+            is_tool_message=is_tool_message,
+            get_content=get_content,
+            set_content=set_content,
         )
     
     def _snip_tool_content(
@@ -303,7 +308,7 @@ class MessageManage:
                 break
 
             source_ids = [
-                _get_message_id(msg)
+                get_message_id(msg)
                 for msg in source_messages
             ]
 
@@ -391,7 +396,7 @@ class MessageManage:
                     break
     
                 source_ids = [
-                    _get_message_id(msg)
+                    get_message_id(msg)
                     for msg in source_messages
                 ]
     
@@ -510,10 +515,10 @@ class MessageManage:
         changed = False
 
         for message in messages:
-            if not self._is_tool_message(message):
+            if not is_tool_message(message):
                 continue
 
-            content = self._get_content(message)
+            content = get_content(message)
 
             if not isinstance(content, str):
                 continue
@@ -525,7 +530,7 @@ class MessageManage:
             if not content_changed:
                 continue
 
-            self._set_content(
+            set_content(
                 message,
                 snipped_content,
             )
@@ -661,11 +666,11 @@ class MessageManage:
         parts = []
 
         for msg in messages:
-            content = self._get_content(msg)
+            content = get_content(msg)
             if not content:
                 continue
 
-            role = _message_role(msg)
+            role = message_role(msg)
             parts.append(
                 {
                     "role": role,
@@ -702,7 +707,7 @@ class MessageManage:
         source_messages = messages[start_index:end_index]
 
         if not all(
-            _is_summary_message(message, session)
+            is_summary_message(message, session)
             for message in source_messages
         ):
             return False
@@ -791,7 +796,7 @@ class MessageManage:
             source_messages = messages[start_index:end_index]
     
             if not all(
-                _is_summary_message(message, session)
+                is_summary_message(message, session)
                 for message in source_messages
             ):
                 return False
@@ -882,13 +887,13 @@ class MessageManage:
 
         human_message, ai_message = source_messages
 
-        if not _is_human_message(human_message):
+        if not is_human_message(human_message):
             return False
 
-        if not _is_ai_message(ai_message):
+        if not is_ai_message(ai_message):
             return False
 
-        if _is_compressed_turn_message(human_message):
+        if is_compressed_turn_message(human_message):
             return False
 
         before_tokens = self.estimate_tokens(messages)
@@ -966,13 +971,13 @@ class MessageManage:
     
             human_message, ai_message = source_messages
     
-            if not _is_human_message(human_message):
+            if not is_human_message(human_message):
                 return False
     
-            if not _is_ai_message(ai_message):
+            if not is_ai_message(ai_message):
                 return False
     
-            if _is_compressed_turn_message(human_message):
+            if is_compressed_turn_message(human_message):
                 return False
     
             before_tokens = self.estimate_tokens(messages)
@@ -1025,36 +1030,3 @@ class MessageManage:
             # 是否禁止重复压缩由 is_compressed_turn 标签负责。
     
             return True
-    
-    @staticmethod
-    @staticmethod
-    
-    @staticmethod
-    def _is_tool_message(msg) -> bool:
-        if isinstance(msg, dict):
-            return msg.get("role") == "tool"
-        return msg.__class__.__name__ == "ToolMessage"
-    
-    @staticmethod
-    
-    @staticmethod
-    
-    @staticmethod
-    
-    @staticmethod
-    
-    @staticmethod
-    
-    @staticmethod
-    def _get_content(msg):
-        if isinstance(msg, dict):
-            return msg.get("content")
-        return getattr(msg, "content", None)
-    
-    @staticmethod
-    def _set_content(msg, content: str):
-        if isinstance(msg, dict):
-            msg["content"] = content
-            return
-        msg.content = content
-
