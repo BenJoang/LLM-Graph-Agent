@@ -38,9 +38,6 @@ rag = [
     "jieba==0.42.1",
     "rank-bm25==0.2.2",
 ]
-wuxi = [
-    "httpx==0.28.1",
-]
 legacy-checkpoints = [
     "langgraph-checkpoint-sqlite==3.1.0",
     "langgraph-checkpoint-postgres==3.1.2",
@@ -52,6 +49,9 @@ dev = [
     "pytest==9.1.1",
     "pytest-asyncio==1.4.0",
 ]
+
+[project.scripts]
+llm-graph-agent-api = "llm_graph_agent.api.__main__:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
