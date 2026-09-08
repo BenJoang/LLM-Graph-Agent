@@ -26,18 +26,31 @@ llm_graph_agent/
 
 ## 快速开始
 
-```bash
-# 安装（含 API 依赖）
-pip install -e ".[api]"
+推荐用 [uv](https://docs.astral.sh/uv/) 管理项目内虚拟环境（`.venv`）。
+Python 版本由 `.python-version` 固定，依赖由 `uv.lock` 锁定。
 
-# 配置模型（复制 .env.example 到 .env 并填写 key）
+```bash
+# 1) 创建 .venv 并装齐全部依赖（含所有 optional extras）
+uv sync --all-extras
+
+# 只装运行时 + API：
+uv sync --extra api
+
+# 不用 uv 的等价做法（需 Python >=3.12）：
+# python -m venv .venv && .venv/Scripts/pip install -e ".[dev,api,rag,postgres,legacy-checkpoints,observability]"
+
+# 2) 配置模型（复制 .env.example 到 .env 并填写 key）
 cp .env.example .env
 
-# 启动 API
-python -m llm_graph_agent.api
+# 3) 启动 API（默认 127.0.0.1:8200）
+uv run python -m llm_graph_agent.api
 # 或命令行入口
-llm-graph-agent-api
+uv run llm-graph-agent-api
 ```
+
+> `legacy-checkpoints` extra 提供 `langgraph-checkpoint-sqlite` / `aiosqlite`，
+> 持久化层依赖它——跑测试时缺它会在 collection 阶段报
+> `No module named 'langgraph.checkpoint.sqlite'`。
 
 启动后：
 
@@ -87,7 +100,10 @@ asyncio.run(main())
 ## 测试
 
 ```bash
-pytest tests -q
+uv run pytest tests -q
+# 或直接用项目内解释器
+.venv/Scripts/python -m pytest tests -q
+
 # Postgres 契约测试需：设置 LLM_GRAPH_TEST_POSTGRES=1 并配置 postgres
 ```
 
