@@ -1,7 +1,6 @@
 # LLM Graph Agent
 
-一个**业务级**的 LangGraph Agent 运行时：从原有项目收敛迁移而来，剥离了
-GUI / QQ / Wuxi 等业务专用外壳，只保留可复用的通用内核，并统一为全 async 通道。
+一 LangGraph Agent 运行时：从原有项目收敛迁移而来，只保留可复用的通用内核，并统一为全 async 通道。
 
 架构对标 opencode：**纯逻辑与副作用分离、单一编排入口、分层配置发现**。
 
@@ -107,15 +106,3 @@ uv run pytest tests -q
 # Postgres 契约测试需：设置 LLM_GRAPH_TEST_POSTGRES=1 并配置 postgres
 ```
 
-## 与原项目的关系
-
-本项目是 `LLM-Graph` 的一次"业务化重构"：把通用内核（模型 / 上下文 /
-压缩 / 工具 / agent 循环 / 持久化 / RAG）迁移并重构到新命名空间
-`llm_graph_agent`，同时**剥离**了：
-- Electron GUI + 会话管理 UI 栈（api/gui_*）
-- QQ 专用图（qq_main / qq_image_review / qq_memory_update）与 QQ 记忆工具
-- Wuxi 业务图与 `/wuxi-agent` 端点
-- TTS 变体图（已收敛进通用 tool_agent，通过工具集配置驱动）
-
-agent 循环已从"每场景抄一份"收敛为 `graph/tool_agent.build_graph`，
-通过 `tool_names` / `skill_names` / `profile_name` 配置驱动。
